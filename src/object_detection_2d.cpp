@@ -7,24 +7,23 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
-#include "objectDetection2D.hpp"
-
+#include "../include/object_detection_2d.h"
 
 using namespace std;
 
 // detects objects in an image using the YOLO library and a set of pre-trained objects from the COCO database;
 // a set of 80 classes is listed in "coco.names" and pre-trained weights are stored in "yolov3.weights"
-void detectObjects(cv::Mat& img, std::vector<BoundingBox>& bBoxes, float confThreshold, float nmsThreshold, 
-                   std::string basePath, std::string classesFile, std::string modelConfiguration, std::string modelWeights, bool bVis)
+void DetectObjects(cv::Mat& img, std::vector<BoundingBox>& bounding_boxes, float confidence_threshold, float nms_threshold,
+                   std::string base_path, std::string classes_file, std::string model_configuration, std::string model_weights, bool visible)
 {
     // load class names from file
     vector<string> classes;
-    ifstream ifs(classesFile.c_str());
+    ifstream ifs(classes_file.c_str());
     string line;
     while (getline(ifs, line)) classes.push_back(line);
     
     // load neural network
-    cv::dnn::Net net = cv::dnn::readNetFromDarknet(modelConfiguration, modelWeights);
+    cv::dnn::Net net = cv::dnn::readNetFromDarknet(model_configuration, model_weights);
     net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
     net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
     
@@ -64,7 +63,7 @@ void detectObjects(cv::Mat& img, std::vector<BoundingBox>& bBoxes, float confThr
             
             // Get the value and location of the maximum score
             cv::minMaxLoc(scores, 0, &confidence, 0, &classId);
-            if (confidence > confThreshold)
+            if (confidence > confidence_threshold)
             {
                 cv::Rect box; int cx, cy;
                 cx = (int)(data[0] * img.cols);
@@ -83,23 +82,23 @@ void detectObjects(cv::Mat& img, std::vector<BoundingBox>& bBoxes, float confThr
     
     // perform non-maxima suppression
     vector<int> indices;
-    cv::dnn::NMSBoxes(boxes, confidences, confThreshold, nmsThreshold, indices);
+    cv::dnn::NMSBoxes(boxes, confidences, confidence_threshold, nms_threshold, indices);
     for(auto it=indices.begin(); it!=indices.end(); ++it) {
         
         BoundingBox bBox;
         bBox.roi = boxes[*it];
-        bBox.classID = classIds[*it];
+        bBox.class_id = classIds[*it];
         bBox.confidence = confidences[*it];
-        bBox.boxID = (int)bBoxes.size(); // zero-based unique identifier for this bounding box
-        
-        bBoxes.push_back(bBox);
+        bBox.id = (int)bounding_boxes.size(); // zero-based unique identifier for this bounding box
+
+        bounding_boxes.push_back(bBox);
     }
     
     // show results
-    if(bVis) {
+    if(visible) {
         
         cv::Mat visImg = img.clone();
-        for(auto it=bBoxes.begin(); it!=bBoxes.end(); ++it) {
+        for(auto it= bounding_boxes.begin(); it!= bounding_boxes.end(); ++it) {
             
             // Draw rectangle displaying the bounding box
             int top, left, width, height;
@@ -110,7 +109,7 @@ void detectObjects(cv::Mat& img, std::vector<BoundingBox>& bBoxes, float confThr
             cv::rectangle(visImg, cv::Point(left, top), cv::Point(left+width, top+height),cv::Scalar(0, 255, 0), 2);
             
             string label = cv::format("%.2f", (*it).confidence);
-            label = classes[((*it).classID)] + ":" + label;
+            label = classes[((*it).class_id)] + ":" + label;
         
             // Display label at the top of the bounding box
             int baseLine;
