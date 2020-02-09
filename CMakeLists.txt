@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS, "${CXX_FLAGS} -pthread")
 project(camera_fusion)
 
 find_package(OpenCV 4.1 REQUIRED)
-find_package(PCL 1.9 REQUIRED)
+find_package(PCL 1.7 REQUIRED)
 
 file(GLOB SOURCES src/*.cpp)
 
