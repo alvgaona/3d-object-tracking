@@ -91,8 +91,8 @@ int main(int argc, const char* argv[]) {
 
   /* Configuration */
   // TODO: Move configuration parameters to a YAML file.
-  std::string detector_type = "HARRIS";
-  std::string descriptor_type = "ORB";
+  std::string detector_type = "AKAZE";
+  std::string descriptor_type = "AKAZE";
   std::string matcher_type = "MAT_BF";
   std::string selector_type = "SEL_KNN";
 
