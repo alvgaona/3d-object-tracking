@@ -1,8 +1,13 @@
 #include "matching_2d.h"
 
-void MatchDescriptors(std::vector<cv::KeyPoint> &keypoints_src, std::vector<cv::KeyPoint> &keypoints_ref, cv::Mat &descriptors_src,
-                      cv::Mat &descriptors_ref, std::vector<cv::DMatch> &matches, const std::string &matcher_type,
-                      const std::string &selector_type) {
+void MatchDescriptors(
+    std::vector<cv::KeyPoint> &keypoints_src,
+    std::vector<cv::KeyPoint> &keypoints_ref,
+    cv::Mat &descriptors_src,
+    cv::Mat &descriptors_ref,
+    std::vector<cv::DMatch> &matches,
+    const std::string &matcher_type,
+    const std::string &selector_type) {
   bool cross_check = false;
   cv::Ptr<cv::DescriptorMatcher> matcher;
   if (matcher_type == "MAT_BF") {
@@ -20,12 +25,10 @@ void MatchDescriptors(std::vector<cv::KeyPoint> &keypoints_src, std::vector<cv::
     auto t = static_cast<double>(cv::getTickCount());
     matcher->match(descriptors_src, descriptors_ref, matches);
     t = (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
-    std::cout << "Nearest Neighbor with " << matches.size() << " matches in " << 1000 * t / 1.0 << " ms." << std::endl;
   } else if (selector_type == "SEL_KNN") {
     std::vector<std::vector<cv::DMatch>> knn_matches;
     auto t = static_cast<double>(cv::getTickCount());
     matcher->knnMatch(descriptors_src, descriptors_ref, knn_matches, 2);
-    std::cout << "K-Nearest Neighbor with " << knn_matches.size() << " matches in " << 1000 * t / 1.0 << " ms" << std::endl;
 
     double min_distance_ratio = 0.8;
     for (auto &knn_match : knn_matches) {
@@ -33,7 +36,6 @@ void MatchDescriptors(std::vector<cv::KeyPoint> &keypoints_src, std::vector<cv::
         matches.push_back(knn_match[0]);
       }
     }
-    std::cout << "Matches removed: " << knn_matches.size() - matches.size() << " kpts." << std::endl;
   }
 }
 
@@ -58,7 +60,6 @@ void DescribeKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::M
   auto t = (double)cv::getTickCount();
   extractor->compute(img, keypoints, descriptors);
   t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-  std::cout << descriptor_type << " descriptor extraction in " << 1000 * t / 1.0 << " ms" << std::endl;
 }
 
 void DetectKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool visualize) {
@@ -82,7 +83,6 @@ void DetectKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img
     keypoints.push_back(keypoint);
   }
   t = (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
-  std::cout << "Shi-Tomasi detection with " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << std::endl;
 
   if (visualize) {
     cv::Mat visible_image = img.clone();
@@ -135,8 +135,6 @@ void DetectKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, b
     }
   }
 
-  std::cout << "Harris detection with " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << std::endl;
-
   if (visualize) {
     std::string window_name = "Harris detector results";
     cv::namedWindow(window_name);
@@ -164,5 +162,4 @@ void DetectKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, c
   auto t = (double)cv::getTickCount();
   detector->detect(img, keypoints);
   t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-  std::cout << detector_type + " detector with " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms." << std::endl;
 }

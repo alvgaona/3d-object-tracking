@@ -8,7 +8,7 @@
 #include "data_frame.h"
 
 void DetectObjects(cv::Mat& img, std::vector<BoundingBox>& bounding_boxes, float confidence_threshold, float nms_threshold,
-                   std::string base_path, std::string classes_file, std::string model_configuration, std::string model_weights,
+                   const std::string& base_path, const std::string& classes_file, const std::string& model_configuration, const std::string& model_weights,
                    bool visible);
 
 #endif
